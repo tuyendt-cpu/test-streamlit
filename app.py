@@ -6,17 +6,18 @@ import os
 from PIL import Image
 import requests
 
+st.set_page_config(
+    layout='wide',
+    page_title='Document Reader Demo',
+    page_icon= 'FPT_logo_2010.svg.png'
+)
 
 if __name__ == '__main__':
 
     st.title('Document Reader Demo')
-    instructions = """
-        Upload or drag your files below
-        """
-    st.write(instructions)
-    img = st.file_uploader('Upload file')
-    if img:
-        st.image(img)
+
+
+
 @st.cache
 def get_data():
     url = 'https://api.fpt.ai/vision/idr/vnm'
@@ -37,18 +38,37 @@ def get_data():
 def load_csv():
     return pd.read_csv('test_data.csv', index_col='Unnamed: 0')
 
-if st.checkbox('Get Data'):
-    data = get_data()
-    try:
-        df = pd.json_normalize(data)
-        prob_columns = []
-        for column in df.columns:
-            if "prob" in column:
-                prob_columns.append(column)
-        non_prob_col = df.drop(columns = prob_columns)
-        dic = non_prob_col.to_dict()
-        df_final = pd.DataFrame.from_dict(dic, orient='index')
-        st.dataframe(df_final, use_container_width =True)
-    except:
-        st.error(data)
+
+
+col2, col3 = st.columns(2)
+
+option = st.sidebar.selectbox(
+    "Choose type of document",
+    ("CCCD", "CMND")
+)
+   
+
+with col2:
+   instructions = "Upload your files below"
+   st.subheader(instructions)
+   img = st.file_uploader('Upload file')
+   if img:
+        st.image(img) 
+
+with col3:
+    st.subheader(f'Result of {option}')
+    if img:
+        data = get_data()
+        try:
+            df = pd.json_normalize(data)
+            prob_columns = []
+            for column in df.columns:
+                if "prob" in column:
+                    prob_columns.append(column)
+            non_prob_col = df.drop(columns = prob_columns)
+            dic = non_prob_col.to_dict()
+            df_final = pd.DataFrame.from_dict(dic, orient='index')
+            st.dataframe(df_final, use_container_width =True, height=df_final.size*40)
+        except:
+            st.error(data)
     
