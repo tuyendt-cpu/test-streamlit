@@ -1,47 +1,43 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import json 
-import os
-from PIL import Image
 import requests
 
+#page layout config
 st.set_page_config(
     layout='wide',
     page_title='Document Reader Demo',
     page_icon= 'FPT_logo_2010.svg.png'
 )
+#This is document reader using FPT api
+st.title('Document Reader FPT API')
 
-if __name__ == '__main__':
-
-    st.title('Document Reader Demo')
-
-
-
+#This function request FPT api and return json data
 @st.cache
 def get_data():
     url = 'https://api.fpt.ai/vision/idr/vnm'
     headers = {
         'api-key': 'g93aEayepguSZpPtLjtscKE4oJuScmgf'
     }
+    #save image that user upload 
     with open(img.name,"wb") as f:
         f.write((img).getbuffer())
+    #open image and post to fpt server
     files = {'image': open(img.name, 'rb').read()}
     response = requests.post(url, files=files, headers=headers)
+
     content = response.json()
     if content['errorCode'] != 0:
         data = content['errorMessage']
     else:
         data = content['data']
     return data
-@st.cache
-def load_csv():
-    return pd.read_csv('test_data.csv', index_col='Unnamed: 0')
 
-
-
+#devide layout into 2 part
+#col2: region of uploading files
+#col3: region of displaying result
 col2, col3 = st.columns(2)
 
+#side bar have 2 options: căn cước công dân hoặc chứng minh thư
 option = st.sidebar.selectbox(
     "Choose type of document",
     ("CCCD", "CMND")
